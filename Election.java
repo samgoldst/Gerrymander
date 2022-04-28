@@ -1,9 +1,11 @@
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class Election {
-    District[] ledger;
-    Town[] towns;
+    private District[] ledger;
+    private Town[] towns;
+    private String[] parties;
 
     public Election(int districts, int towns, String[] parties, int maxVoters){
         this.ledger = new District[districts];
@@ -21,10 +23,68 @@ public class Election {
             }
             ledger[rand.nextInt(districts)].add(new Town(voters));
         }
+        this.parties = parties.clone();
     }
 
     public static void main(String[] args){
-        Election election = new Election(5, 10, new String[]{"red", "blue"}, 100);
-        System.out.println(election.ledger[0].toString());
+        Election election = new Election(50, 19495, new String[]{"red", "blue"}, 33804);
+        System.out.println(election.popDistribution());
+        System.out.println(election.getResult());
+        System.out.println(election);
     }
+
+    public District[] getLedger(){
+        return this.ledger.clone();
+    }
+
+    public Town[] getTowns(){
+        return this.towns.clone();
+    }
+
+    public double popDistribution(){
+        int pops = 0;
+
+        for(District district : this.ledger){
+            pops += district.getPopulation();
+        }
+
+        double target = pops / (double) this.ledger.length;
+        double output = 0;
+
+        for(int i = 0; i < this.ledger.length; i++){
+            output += Math.pow(this.ledger[i].getPopulation() - target, 2) / target;
+        }
+        return output;
+    }
+
+    public String toString(){
+        String output = "";
+        for(District district : this.ledger){
+            output += district.toString();
+            output += "\n";
+        }
+        return output;
+    }
+
+    public Result getResult(){
+        HashMap<String, Integer> wins = new HashMap<>();
+
+        for(District district : this.ledger){
+            wins.put(district.getWinner(), wins.getOrDefault(district.getWinner(), 0) + 1);
+        }
+
+        int maxWins = 0;
+        String winner = null;
+
+        for(Map.Entry<String, Integer> party: wins.entrySet()){
+            if(party.getValue() > maxWins){
+                maxWins = party.getValue();
+                winner = party.getKey();
+            }
+        }
+
+        return new Result(winner, maxWins / (double)this.ledger.length);
+    }
+
+    public record Result(String winner, double percentage){}
 }
