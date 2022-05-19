@@ -1,13 +1,15 @@
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 public class District {
-    private HashSet<Town> towns = new HashSet<>();
+    private List<Town> towns = new ArrayList<>();
     private int id;
 
     public District(int id){
         this.id = id;
+    }
+
+    public int size(){
+        return this.towns.size();
     }
 
     public void add(Town town){
@@ -16,6 +18,11 @@ public class District {
 
     public void remove(Town town){
         this.towns.remove(town);
+    }
+
+    public Town getRandomTown(){
+        Random rand = new Random();
+        return this.towns.get(rand.nextInt(this.towns.size()));
     }
 
     public int getPopulation(){
