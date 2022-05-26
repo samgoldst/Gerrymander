@@ -1,5 +1,6 @@
 import java.util.HashMap;
 import java.util.Random;
+import java.lang.Math;
 
 public class Election {
     private District[] ledger;
@@ -21,7 +22,7 @@ public class Election {
         for(int i = 0; i < towns; i++){
             HashMap<String, Integer> voters = new HashMap<>();
             for(String party : parties){
-                voters.put(party, this.rand.nextInt(maxVoters + 1));
+                voters.put(party, (int) Math.pow(this.rand.nextInt(maxVoters + 1), 2));
             }
             ledger[this.rand.nextInt(districts)].add(new Town(voters));
         }
@@ -32,14 +33,14 @@ public class Election {
         for (int i = 0; i < iterations; i++){
             Election newElection = new Election(this);
             newElection.townMove();
-            double newScore = newElection.popDistribution();
-            double oldScore = this.popDistribution();
-            if(newScore < oldScore) {
+            double newScore = newElection.eval();
+            double oldScore = this.eval();
+            if(newScore <= oldScore) {
                 this.ledger = newElection.getLedger();
-                System.out.println(newScore + oldScore + "done");
             }
         }
     }
+
     public void townMove(){
         int districtNum = this.rand.nextInt(this.ledger.length);
         while(this.ledger[districtNum].size() == 0) {
@@ -70,7 +71,11 @@ public class Election {
     }
 
     public District[] getLedger(){
-        return this.ledger.clone();
+        District[] newLedger = new District[this.ledger.length];
+        for(int i = 0; i < this.ledger.length; i++){
+            newLedger[i] = this.ledger[i].copy();
+        }
+        return newLedger;
     }
 
     public Town[] getTowns(){
@@ -98,7 +103,7 @@ public class Election {
     }
 
     public double eval(){
-        return (this.comparePercent()) * (this.popDistribution());
+        return this.popDistribution() * (this.comparePercent() + .1);
     }
 
     public String toString(){
@@ -122,12 +127,14 @@ public class Election {
     public record Result(String party, double percentage){}
 
     public static void main(String[] args){
-        Election election = new Election(10, 1000, new String[]{"red", "blue"}, 100, "blue", .7);
-        for(int i = 0; i < 1000; i ++){
-            election.updateMap(1);
-            if(election.eval() == 0.0){
-                System.out.println(election.toString());
-            }
+        Election election = new Election(50, 100000, new String[]{"red", "blue", "green", "purple"}, 2000, "blue", .40);
+        for(int i = 0; i < 100; i ++){
+            election.updateMap(100);
+            System.out.print("\r" + (i + 1) + "% complete");
         }
+        System.out.println();
+        System.out.println(election.eval());
+        System.out.println(election.getResult("blue"));
+        System.out.println(election);
     }
 }
