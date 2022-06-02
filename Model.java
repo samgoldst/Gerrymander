@@ -8,7 +8,7 @@ public class Model {
 
     public void gerrymander(int iterations){
         for(int i = 0; i < 100; i ++) {
-            this.election.updateMap(iterations / 100);
+            this.election.updateMap(iterations / 100, i);
             System.out.print("\r" + (i + 1) + "% complete");
         }
     }

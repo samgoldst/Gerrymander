@@ -35,12 +35,12 @@ public class Election {
         this.parties = election.getParties();
     }
 
-    public void updateMap(int iterations){
+    public void updateMap(int iterations, int progress){
         for (int i = 0; i < iterations; i++){
             Election newElection = new Election(this);
             newElection.townMove();
-            double newScore = newElection.eval();
-            double oldScore = this.eval();
+            double newScore = newElection.eval(progress);
+            double oldScore = this.eval(progress);
             if(newScore <= oldScore) {
                 this.ledger = newElection.getLedger();
             }
@@ -102,12 +102,14 @@ public class Election {
         return Math.abs(goalPercentage - this.getResult(this.goalWinner).percentage);
     }
 
-    public double eval(){
-        return this.popDistribution() * (this.comparePercent() + .02);
+    public double eval(int progress){
+        return this.popDistribution() * Math.pow(((1 - progress) * 10), 10) * (this.comparePercent() + .001);
     }
 
     public String toString(){
         StringBuilder output = new StringBuilder();
+        output.append(this.getResult(this.goalWinner));
+        output.append("\n");
         for(District district : this.ledger){
             output.append(district.toString());
             output.append("\n");
