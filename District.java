@@ -64,8 +64,9 @@ public class District {
     @Override
     public String toString() {
         String output = "";
-        output += this.id;
-        output += getDemographics().toString();
+        for(int i : getDemographics().values()){
+            output += i + " ";
+        }
         return output;
     }
 

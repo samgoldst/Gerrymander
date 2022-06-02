@@ -4,7 +4,6 @@ import java.lang.Math;
 
 public class Election {
     private District[] ledger;
-    private Town[] towns;
     private String[] parties;
     private double goalPercentage;
     private String goalWinner;
@@ -29,6 +28,13 @@ public class Election {
         this.parties = parties.clone();
     }
 
+    public Election(Election election) {
+        this.ledger = election.getLedger();
+        this.goalPercentage = election.getGoalPercentage();
+        this.goalWinner = election.getGoalWinner();
+        this.parties = election.getParties();
+    }
+
     public void updateMap(int iterations){
         for (int i = 0; i < iterations; i++){
             Election newElection = new Election(this);
@@ -38,6 +44,11 @@ public class Election {
             if(newScore <= oldScore) {
                 this.ledger = newElection.getLedger();
             }
+            //else{
+            //   if(this.rand.nextInt(10) == 1){
+            //       this.ledger = newElection.getLedger();
+            //   }
+            //}
         }
     }
 
@@ -63,23 +74,12 @@ public class Election {
         return parties.clone();
     }
 
-    public Election(Election election){
-        this.ledger = election.getLedger();
-        this.goalPercentage = election.getGoalPercentage();
-        this.goalWinner = election.getGoalWinner();
-        this.parties = election.getParties();
-    }
-
     public District[] getLedger(){
         District[] newLedger = new District[this.ledger.length];
         for(int i = 0; i < this.ledger.length; i++){
             newLedger[i] = this.ledger[i].copy();
         }
         return newLedger;
-    }
-
-    public Town[] getTowns(){
-        return this.towns.clone();
     }
 
     public double popDistribution(){
@@ -92,27 +92,27 @@ public class Election {
         double target = pops / (double) this.ledger.length;
         double output = 0;
 
-        for(int i = 0; i < this.ledger.length; i++){
-            output += Math.pow(this.ledger[i].getPopulation() - target, 2) / target;
+        for (District district : this.ledger) {
+            output += Math.pow(district.getPopulation() - target, 2) / target;
         }
         return output;
     }
 
     public double comparePercent(){
-        return Math.abs(this.getResult(this.goalWinner).percentage - goalPercentage);
+        return Math.abs(goalPercentage - this.getResult(this.goalWinner).percentage);
     }
 
     public double eval(){
-        return this.popDistribution() * (this.comparePercent() + .1);
+        return this.popDistribution() * (this.comparePercent() + .02);
     }
 
     public String toString(){
-        String output = "";
+        StringBuilder output = new StringBuilder();
         for(District district : this.ledger){
-            output += district.toString();
-            output += "\n";
+            output.append(district.toString());
+            output.append("\n");
         }
-        return output;
+        return output.toString();
     }
 
     public Result getResult(String party){
@@ -125,16 +125,4 @@ public class Election {
     }
 
     public record Result(String party, double percentage){}
-
-    public static void main(String[] args){
-        Election election = new Election(50, 100000, new String[]{"red", "blue", "green", "purple"}, 2000, "blue", .40);
-        for(int i = 0; i < 100; i ++){
-            election.updateMap(100);
-            System.out.print("\r" + (i + 1) + "% complete");
-        }
-        System.out.println();
-        System.out.println(election.eval());
-        System.out.println(election.getResult("blue"));
-        System.out.println(election);
-    }
 }
