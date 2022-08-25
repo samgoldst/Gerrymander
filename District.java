@@ -67,6 +67,7 @@ public class District {
         for(int i : getDemographics().values()){
             output += i + " ";
         }
+        output += getPopulation();
         return output;
     }
 

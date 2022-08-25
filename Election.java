@@ -21,7 +21,7 @@ public class Election {
         for(int i = 0; i < towns; i++){
             HashMap<String, Integer> voters = new HashMap<>();
             for(String party : parties){
-                voters.put(party, (int) Math.pow(this.rand.nextInt(maxVoters + 1), 2));
+                voters.put(party, (int) Math.pow(this.rand.nextInt(maxVoters + 1), 1.5));
             }
             ledger[this.rand.nextInt(districts)].add(new Town(voters));
         }
@@ -35,12 +35,12 @@ public class Election {
         this.parties = election.getParties();
     }
 
-    public void updateMap(int iterations, int progress){
+    public void updateMap(int iterations, int progress, int craziness){
         for (int i = 0; i < iterations; i++){
             Election newElection = new Election(this);
             newElection.townMove();
-            double newScore = newElection.eval(progress);
-            double oldScore = this.eval(progress);
+            double newScore = newElection.eval(progress, craziness);
+            double oldScore = this.eval(progress, craziness);
             if(newScore <= oldScore) {
                 this.ledger = newElection.getLedger();
             }
@@ -102,8 +102,8 @@ public class Election {
         return Math.abs(goalPercentage - this.getResult(this.goalWinner).percentage);
     }
 
-    public double eval(int progress){
-        return this.popDistribution() * Math.pow(((1 - progress) * 10), 10) * (this.comparePercent() + .001);
+    public double eval(int progress, int craziness){
+        return (this.comparePercent() + (progress)/craziness) * this.popDistribution();
     }
 
     public String toString(){
